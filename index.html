@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShibaPost Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            scroll-behavior: smooth;
+        }
+        h1, h2, h3 {
+            color: #64b5f6; /* Soft blue */
+        }
+        h1 { font-size: 2.5em; margin-bottom: 0.5em; }
+        h2 { font-size: 2em; margin-top: 2em; margin-bottom: 0.5em; }
+        h3 { font-size: 1.5em; margin-top: 1.5em; margin-bottom: 0.5em; }
+        a { color: #64b5f6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        main { max-width: 800px; margin: 0 auto; }
+        pre { 
+            background: #1e1e1e; 
+            padding: 15px; 
+            border-left: 5px solid #64b5f6; 
+            overflow-x: auto; 
+            font-family: 'Courier New', monospace; 
+        }
+        code { background-color: #2d2d2d; padding: 2px 4px; border-radius: 4px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #444; padding: 8px; text-align: left; }
+        th { background-color: #333; }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 5px; 
+            margin-top: 10px; 
+            background-color: #2d2d2d; 
+            color: #e0e0e0; 
+            border: 1px solid #444; 
+            border-radius: 4px; 
+        }
+        button { 
+            margin-top: 10px; 
+            padding: 5px 10px; 
+            background: #64b5f6; 
+            color: #121212; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+        .highlight-address {
+            background-color: #444;
+            padding: 2px 4px;
+            border-radius: 4px;
+            color: #64b5f6;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>ShibaPost Documentation</h1>
+        <p><strong>ShibaPost</strong> is a method of using the Dogecoin blockchain to create threaded conversations and rank content through voting. This method is inscribed on the Dogecoin blockchain itself using the ShibaPost method, as defined in the following transactions on block 5610617:</p>
+        <ul>
+            <li><strong>ShibaPost and Reply:</strong> Transaction <a href="https://sochain.com/tx/DOGE/93094cc09154236118f35aeed99b74fd701852572724fc9c45ff18bb2ba2de7f">93094cc09154236118f35aeed99b74fd701852572724fc9c45ff18bb2ba2de7f</a><br>Definition: <code>ShibaPost: OP_RETURN>0, Reply (p2pkh): DShibaRL[base58(refTxId)[0-19]][checksum]</code></li>
+            <li><strong>ShibaPost Voting:</strong> Transaction <a href="https://sochain.com/tx/DOGE/79816fc4ac18c8c39b2ee8d46c8a459a22801951b9b93e27553d0dc4a4c8ab85">79816fc4ac18c8c39b2ee8d46c8a459a22801951b9b93e27553d0dc4a4c8ab85</a><br>Definition: <code>ShibaPost Up/Downvote (p2pkh): DShiba(UP|DN)[base58(refTxId)[0-19]][checksum]</code></li>
+        </ul>
+
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#creating-a-post">Creating a Post</a></li>
+            <li><a href="#replying-to-a-post">Replying to a Post</a></li>
+            <li><a href="#voting-on-a-post">Voting on a Post</a></li>
+            <li><a href="#generating-addresses">Generating Addresses</a></li>
+        </ul>
+
+        <h2 id="creating-a-post">Creating a Post</h2>
+        <p>To create a post, make a Dogecoin transaction with:</p>
+        <ul>
+            <li><strong>OP_RETURN output:</strong> Your message (up to 80 bytes, e.g., "Hello, Shiba!")</li>
+            <li><strong>Value:</strong> More than 0 DOGE (e.g., 0.1 DOGE). The amount burned sets the <strong>initial vote count</strong> for your post.</li>
+        </ul>
+
+        <h2 id="replying-to-a-post">Replying to a Post</h2>
+        <p>To reply, create a new post—a transaction with an OP_RETURN output containing your reply and a value greater than 0 DOGE. Then, include an output to the <strong>ShibaPost-Reply</strong> address derived from the parent post’s transaction ID.</p>
+        <p>The reply address begins with <code>DShibaRL</code>. See the "Generating Addresses" section for details.</p>
+        <p><i>Notes: Only the first ShibaPost reply address in a transaction is used if multiple are present.</i></p>
+
+        <h2 id="voting-on-a-post">Voting on a Post</h2>
+        <p>To vote, send Dogecoin to one of two special addresses derived from the post’s transaction ID:</p>
+        <ul>
+            <li><strong>Upvote:</strong> Starts with <code>DShibaUP</code></li>
+            <li><strong>Downvote:</strong> Starts with <code>DShibaDN</code></li>
+        </ul>
+        <p>The amount of Dogecoin sent is the number of votes added (upvote) or subtracted (downvote). The total vote count is the OP_RETURN burn amount plus all upvotes minus all downvotes.</p>
+        <p>Voting can be done using nothing but a standard Dogecoin wallet—just send Dogecoin to the appropriate address!</p>
+
+        <h2 id="generating-addresses">Generating Addresses</h2>
+        <p>Convert the transaction ID to base58, then use the first 20 characters to create addresses with prefixes—<code>DShibaRL</code> (reply), <code>DShibaUP</code> (upvote), and <code>DShibaDN</code> (downvote).</p>
+        <p>For example, the transaction ID <code>ff56385115eacae5996e079147b4953d77f5a5dfdb4c356752599b1857a27d2d</code> converts to base58 as <code>JBjDYiCgtxikerQDn6D6r6xzRgeXNjsa2kbPA7kC3PKa</code>. The first 20 characters (<code><span class="highlight-address">JBjDYiCgtxikerQDn6D6</span></code>) are used to form:</p>
+        <ul>
+            <li><code>DShibaRL<span class="highlight-address">JBjDYiCgtxikerQDn6D6</span>VCFQeW</code> (Reply)</li>
+            <li><code>DShibaUP<span class="highlight-address">JBjDYiCgtxikerQDn6D6</span>biRSB6</code> (Upvote)</li>
+            <li><code>DShibaDN<span class="highlight-address">JBjDYiCgtxikerQDn6D6</span>YYVwEc</code> (Downvote)</li>
+        </ul>
+        <p>Use this tool to generate ShibaPost addresses from a transaction id:</p>
+        <input type="text" id="txid-input" placeholder="ff56385115eacae5996e079147b4953d77f5a5dfdb4c356752599b1857a27d2d">
+        <div id="address-table"></div>
+        <button onclick="generateAddresses()">Generate Addresses</button>
+    </main>
+
+    <script>
+        const crypto = window.crypto || window.msCrypto;
+
+        class Base58Encoding {
+            static async getCheckSum(data) {
+                const sha256 = async (input) => {
+                    const hash = await crypto.subtle.digest('SHA-256', new Uint8Array(input));
+                    return new Uint8Array(hash);
+                };
+                const hash1 = await sha256(data);
+                const hash2 = await sha256(hash1);
+                return hash2.slice(0, 4);
+            }
+            static async addCheckSum(data) {
+                const checkSum = await Base58Encoding.getCheckSum(data);
+                return new Uint8Array([...data, ...checkSum]);
+            }
+            static encode(data) {
+                let intData = BigInt(0);
+                for (let i = 0; i < data.length; i++) {
+                    intData = intData * 256n + BigInt(data[i]);
+                }
+                let result = '';
+                while (intData > 0n) {
+                    const remainder = Number(intData % 58n);
+                    intData = intData / 58n;
+                    result = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"[remainder] + result;
+                }
+                for (let i = 0; i < data.length && data[i] === 0; i++) {
+                    result = '1' + result;
+                }
+                return result;
+            }
+            static async encodeWithCheckSum(data) {
+                const dataWithCheckSum = await Base58Encoding.addCheckSum(data);
+                return Base58Encoding.encode(dataWithCheckSum);
+            }
+            static decode(s) {
+                let intData = BigInt(0);
+                for (let i = 0; i < s.length; i++) {
+                    const digit = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".indexOf(s[i]);
+                    if (digit < 0) throw new Error(`Invalid Base58 character '${s[i]}' at position ${i}`);
+                    intData = intData * 58n + BigInt(digit);
+                }
+                let leadingZeroCount = 0;
+                for (let i = 0; i < s.length && s[i] === '1'; i++) {
+                    leadingZeroCount++;
+                }
+                let result = new Uint8Array(leadingZeroCount + (s.length - leadingZeroCount) * 733 / 1000 + 1);
+                let byteIndex = result.length - 1;
+                while (intData > 0n) {
+                    result[byteIndex] = Number(intData % 256n);
+                    intData = intData / 256n;
+                    byteIndex--;
+                }
+                for (let i = 0; i < leadingZeroCount; i++) {
+                    result[i] = 0;
+                }
+                const start = result.findIndex(byte => byte !== 0);
+                return result.slice(start);
+            }
+        }
+
+        function hexToBytes(hex) {
+            return Uint8Array.from(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+        }
+
+        async function generateAddresses() {
+            let txidHex = document.getElementById('txid-input').value.trim();
+            if (!txidHex) {
+                txidHex = document.getElementById('txid-input').placeholder;
+            }
+            if (txidHex.length !== 64 || !/^[0-9a-fA-F]+$/.test(txidHex)) {
+                alert('Please enter a valid 64-character hex transaction ID.');
+                return;
+            }
+
+            try {
+                const txidBytes = hexToBytes(txidHex);
+                const base58Str = Base58Encoding.encode(txidBytes);
+                const first20 = base58Str.slice(0, 20);
+
+                const prefixes = ['ShibaRL', 'ShibaUP', 'ShibaDN'];
+                const addressTypes = ['Reply', 'Upvote', 'Downvote'];
+
+                const addresses = await Promise.all(prefixes.map(async (prefix, index) => {
+                    const input = prefix + first20;
+                    const fullInput = `D${input}XXXXXX`;
+                    const decoded = Base58Encoding.decode(fullInput);
+                    const sliced = decoded.slice(1, 21);
+                    const withPrefix = new Uint8Array([0x1e, ...sliced]);
+                    const address = await Base58Encoding.encodeWithCheckSum(withPrefix);
+                    return { type: addressTypes[index], address };
+                }));
+
+                const tableHtml = `
+                    <table>
+                        <tr><th>Type</th><th>Address</th></tr>
+                        ${addresses.map(addr => `<tr><td>${addr.type}</td><td>${addr.address}</td></tr>`).join('')}
+                    </table>
+                `;
+                document.getElementById('address-table').innerHTML = tableHtml;
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
