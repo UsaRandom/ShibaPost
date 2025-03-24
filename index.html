@@ -82,11 +82,11 @@
         <p>To create a post, make a Dogecoin transaction with:</p>
         <ul>
             <li><strong>OP_RETURN output:</strong> Your message (up to 80 bytes, e.g., "Hello, Shiba!")</li>
-            <li><strong>Value:</strong> More than 0 DOGE (e.g., 0.1 DOGE). The amount burned sets the <strong>initial vote count</strong> for your post.</li>
+            <li><strong>Assign a Value to the OP_RETURN vout:</strong> More than 0 DOGE (e.g., 0.1 DOGE). This dogecoin will become unspendable and be removed from circulation (burned). The amount burned sets the <strong>initial vote count</strong> for your post.</li>
         </ul>
 
         <h2 id="replying-to-a-post">Replying to a Post</h2>
-        <p>To reply, create a new post—a transaction with an OP_RETURN output containing your reply and a value greater than 0 DOGE. Then, include an output to the <strong>ShibaPost-Reply</strong> address derived from the parent post’s transaction ID.</p>
+        <p>To reply, create a new post—a transaction with an OP_RETURN output (>0 doge) containing your reply. Then, include an output to the <strong>ShibaPost-Reply</strong> address derived from the parent post’s transaction ID.</p>
         <p>The reply address begins with <code>DShibaRL</code>. See the "Generating Addresses" section for details.</p>
         <p><i>Notes: Only the first ShibaPost reply address in a transaction is used if multiple are present.</i></p>
 
